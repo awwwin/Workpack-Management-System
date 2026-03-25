@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Package, UserPlus, CheckCircle, Shield, Zap } from 'lucide-react';
 import { setCurrentUserRole } from '../lib/mockData';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function RegisterScreen() {
   const navigate = useNavigate();

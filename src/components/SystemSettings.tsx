@@ -17,7 +17,7 @@ import {
   Upload
 } from 'lucide-react';
 import { useToast } from './Toast';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function SystemSettings() {
   const { showToast, ToastContainer } = useToast();

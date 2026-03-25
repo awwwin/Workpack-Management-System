@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Package, LogIn, CheckCircle, Users, Shield } from 'lucide-react';
 import { setCurrentUserRole } from '../lib/mockData';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LoginLoading } from './LoginLoading';
 
 export function LoginScreen() {

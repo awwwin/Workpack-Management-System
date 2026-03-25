@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { mockUsers } from '../lib/mockData';
 import { useToast } from './Toast';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface User {
   id: string;
