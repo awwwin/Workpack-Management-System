@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -13,7 +13,7 @@ import {
   Monitor,
   Check
 } from 'lucide-react';
-import { getCurrentUser } from '../lib/mockData';
+import { supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface ProfileDropdownProps {
@@ -23,9 +23,46 @@ interface ProfileDropdownProps {
 
 export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { theme, setTheme } = useTheme();
   const [showThemeSubmenu, setShowThemeSubmenu] = useState(false);
+
+  useEffect(() => {
+  async function loadCurrentUser() {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      console.error('Auth user error:', authError);
+      return;
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError.message);
+
+      setCurrentUser({
+        name: authData.user.email?.split('@')[0] || 'User',
+        email: authData.user.email || '',
+        role: 'contractor',
+      });
+      return;
+    }
+
+    setCurrentUser({
+      name: profileData.full_name,
+      email: profileData.email,
+      role: profileData.role,
+      avatar_url: profileData.avatar_url,
+    });
+  }
+
+  loadCurrentUser();
+}, []);
 
   const handleLogout = () => {
     onClose();
@@ -59,26 +96,26 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
       icon: User, 
       label: 'Profile', 
       onClick: handleProfileClick,
-      className: 'text-slate-700 hover:bg-blue-50 hover:text-blue-600'
+      className: 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600'
     },
     { 
       icon: Settings, 
       label: 'Account Settings', 
       onClick: handleSettingsClick,
-      className: 'text-slate-700 hover:bg-blue-50 hover:text-blue-600'
+      className: 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600'
     },
     { 
       icon: Palette, 
       label: 'Theme', 
       hasSubmenu: true,
       onClick: () => setShowThemeSubmenu(!showThemeSubmenu),
-      className: 'text-slate-700 hover:bg-blue-50 hover:text-blue-600'
+      className: 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600'
     },
     { 
       icon: RefreshCw, 
       label: 'Switch Account', 
       onClick: handleSwitchAccount,
-      className: 'text-slate-700 hover:bg-blue-50 hover:text-blue-600',
+      className: 'text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600',
       divider: true
     },
     { 
@@ -135,7 +172,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
     },
   ];
 
-  if (!isOpen) return null;
+if (!isOpen || !currentUser) return null;
 
   return (
     <>
@@ -157,20 +194,32 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 border-b border-slate-200">
           <div className="flex items-center gap-4">
             {/* Avatar */}
-            <motion.div 
-              className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400 }}
-            >
-              <span className="text-white font-semibold text-lg">
-                {currentUser.name.split(' ').map(n => n[0]).join('')}
-              </span>
-            </motion.div>
+<motion.div
+  className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 shadow-lg bg-slate-100"
+  whileHover={{ scale: 1.05 }}
+  transition={{ type: "spring", stiffness: 400 }}
+>
+  {currentUser.avatar_url ? (
+    <img
+      src={currentUser.avatar_url}
+      alt="Profile"
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+      <span className="text-white font-semibold text-lg">
+        {currentUser.name
+          ? currentUser.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+          : 'U'}
+      </span>
+    </div>
+  )}
+</motion.div>
             
             {/* User Info */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-slate-900 truncate">{currentUser.name}</h3>
-              <p className="text-sm text-slate-600 truncate">{currentUser.email}</p>
+              <h3 className="font-semibold text-slate-900 dark:text-white truncate">{currentUser.name}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 truncate">{currentUser.email}</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full capitalize">
                 {currentUser.role}
               </span>
@@ -225,11 +274,11 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
               className="absolute left-full top-0 ml-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
             >
               <div className="p-4 border-b border-slate-200 bg-slate-50">
-                <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                   <Palette className="w-5 h-5 text-blue-600" />
                   Choose Theme
                 </h3>
-                <p className="text-xs text-slate-600 mt-1">Select your preferred appearance</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">Select your preferred appearance</p>
               </div>
 
               <div className="p-3 space-y-2">
@@ -263,11 +312,11 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                               isSelected ? 'bg-blue-100' : 'bg-slate-100'
                             }`}>
                               <ThemeIcon className={`w-4 h-4 ${
-                                isSelected ? 'text-blue-600' : 'text-slate-600'
+                                isSelected ? 'text-blue-600' : 'text-slate-600 dark:text-slate-300'
                               }`} />
                             </div>
                             <span className={`font-semibold text-sm ${
-                              isSelected ? 'text-blue-900' : 'text-slate-900'
+                              isSelected ? 'text-blue-900' : 'text-slate-900 dark:text-white'
                             }`}>
                               {themeOption.label}
                             </span>
@@ -281,7 +330,7 @@ export function ProfileDropdown({ isOpen, onClose }: ProfileDropdownProps) {
                               </motion.div>
                             )}
                           </div>
-                          <p className="text-xs text-slate-600">{themeOption.description}</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300">{themeOption.description}</p>
                         </div>
                       </div>
                     </motion.button>

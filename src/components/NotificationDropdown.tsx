@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, CheckCircle, AlertCircle, Clock, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Notification {
   id: string;
@@ -55,43 +56,94 @@ const mockNotifications: Notification[] = [
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showBadge, setShowBadge] = useState(true);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+const loadNotifications = async () => {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    // Simulate new notifications
-    const interval = setInterval(() => {
-      const newNotification: Notification = {
-        id: Date.now().toString(),
-        title: 'System Update',
-        message: 'New activity detected in your workspace',
-        time: 'Just now',
-        type: 'info',
-        read: false,
-      };
-      setNotifications(prev => [newNotification, ...prev]);
-      setShowBadge(true);
-    }, 30000); // Every 30 seconds
+  if (authError || !authData.user) {
+    console.error('Auth error:', authError);
+    return;
+  }
 
-    return () => clearInterval(interval);
-  }, []);
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', authData.user.id)
+    .order('created_at', { ascending: false });
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
-  };
+  if (error) {
+    console.error('Notification fetch error:', error.message);
+    return;
+  }
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-    setShowBadge(false);
-  };
+  const formatted = (data || []).map((n: any) => ({
+    id: String(n.id),
+    title: n.title,
+    message: n.message,
+    time: new Date(n.created_at).toLocaleString(),
+    type: n.type as 'success' | 'warning' | 'info',
+    read: n.read,
+  }));
 
-  const handleRemove = (id: string) => {
-    setNotifications(notifications.filter(n => n.id !== id));
-  };
+  setNotifications(formatted);
+};
+ useEffect(() => {
+  loadNotifications();
+}, []); 
+
+  
+const handleMarkAsRead = async (id: string) => {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('id', Number(id));
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  setNotifications((prev) =>
+    prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+  );
+};
+
+const handleMarkAllAsRead = async () => {
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData.user) return;
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('user_id', authData.user.id)
+    .eq('read', false);
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  setShowBadge(false);
+};
+
+const handleRemove = async (id: string) => {
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('id', Number(id));
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  setNotifications((prev) => prev.filter((n) => n.id !== id));
+};
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -118,10 +170,13 @@ export function NotificationDropdown() {
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 hover:bg-slate-100 rounded-xl transition-all group"
+        onClick={() => {
+         setIsOpen(!isOpen);
+         loadNotifications();
+       }}
+        className="relative p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all group"
       >
-        <Bell className="w-5 h-5 text-slate-600 group-hover:scale-110 transition-transform" />
+        <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:scale-110 transition-transform" />
         {unreadCount > 0 && showBadge && (
           <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold animate-pulse">
             {unreadCount}
@@ -138,13 +193,13 @@ export function NotificationDropdown() {
           ></div>
 
           {/* Dropdown */}
-          <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden animate-in slide-in-from-top-5 duration-200">
+          <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in slide-in-from-top-5 duration-200">
             {/* Header */}
-            <div className="p-4 border-b border-slate-200 bg-slate-50">
+           <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-slate-900">Notifications</h3>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <h3 className="font-semibold text-slate-900 dark:text-white">Notifications</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                     {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
                   </p>
                 </div>
@@ -162,12 +217,12 @@ export function NotificationDropdown() {
             {/* Notifications List */}
             <div className="max-h-96 overflow-y-auto">
               {notifications.length > 0 ? (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 dark:divide-slate-700">
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 hover:bg-slate-50 transition-all group ${
-                        !notification.read ? 'bg-blue-50/50' : ''
+                       className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group ${
+                       !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
                       }`}
                     >
                       <div className="flex gap-3">
@@ -176,7 +231,7 @@ export function NotificationDropdown() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-sm text-slate-900">
+                            <h4 className="font-medium text-sm text-slate-900 dark:text-white">
                               {notification.title}
                               {!notification.read && (
                                 <span className="ml-2 w-2 h-2 bg-blue-600 rounded-full inline-block"></span>
@@ -184,14 +239,14 @@ export function NotificationDropdown() {
                             </h4>
                             <button
                               onClick={() => handleRemove(notification.id)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 rounded"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
                             >
                               <X className="w-3 h-3 text-slate-500" />
                             </button>
                           </div>
-                          <p className="text-sm text-slate-600 mt-1">{notification.message}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{notification.message}</p>
                           <div className="flex items-center justify-between mt-2">
-                            <p className="text-xs text-slate-500">{notification.time}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{notification.time}</p>
                             {!notification.read && (
                               <button
                                 onClick={() => handleMarkAsRead(notification.id)}
@@ -209,13 +264,13 @@ export function NotificationDropdown() {
               ) : (
                 <div className="p-8 text-center">
                   <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500">No notifications</p>
+                  <p className="text-slate-500 dark:text-slate-400">No notifications</p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-slate-200 bg-slate-50">
+            <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
               <button className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium py-2">
                 View all notifications
               </button>

@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router';
+import {useEffect, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Clock, 
   CheckCircle, 
@@ -8,16 +9,52 @@ import {
   ArrowRight,
   TrendingUp
 } from 'lucide-react';
-import { mockWorkpacks, getCurrentUser } from '../lib/mockData';
+import { supabase } from '../lib/supabase';
 
 export function ReviewerDashboard() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+const [myWorkpacks, setMyWorkpacks] = useState<any[]>([]);
 
-  // Get workpacks for this reviewer
-  const myWorkpacks = mockWorkpacks.filter(
-    w => w.assignedReviewer === currentUser.name
-  );
+
+useEffect(() => {
+  async function loadReviewerDashboard() {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      console.error('Auth user error:', authError);
+      return;
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+
+    if (profileError || !profileData) {
+      console.error('Profile fetch error:', profileError);
+      return;
+    }
+
+    setCurrentUser(profileData);
+
+    const { data: workpackData, error: workpackError } = await supabase
+      .from('workpacks')
+      .select('*')
+      .eq('reviewer_id', profileData.id)
+      .order('created_at', { ascending: false });
+
+    if (workpackError) {
+      console.error('Workpack fetch error:', workpackError.message);
+      return;
+    }
+
+    setMyWorkpacks(workpackData || []);
+  }
+
+  loadReviewerDashboard();
+}, []);
 
   const pendingReview = myWorkpacks.filter(w => w.status === 'pending_review');
   const approved = myWorkpacks.filter(w => w.status === 'approved');
@@ -50,7 +87,7 @@ export function ReviewerDashboard() {
       case 'pending_review': return 'bg-amber-100 text-amber-700';
       case 'approved': return 'bg-emerald-100 text-emerald-700';
       case 'revision_requested': return 'bg-orange-100 text-orange-700';
-      default: return 'bg-slate-100 text-slate-700';
+      default: return 'bg-slate-100 text-slate-700 dark:text-slate-300';
     }
   };
 
@@ -75,8 +112,8 @@ export function ReviewerDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Reviewer Dashboard</h1>
-        <p className="text-slate-600 mt-1">Review and manage workpack submissions</p>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Reviewer Dashboard</h1>
+        <p className="text-slate-600 dark:text-slate-300 mt-1">Review and manage workpack submissions</p>
       </div>
 
       {/* Summary Cards */}
@@ -88,8 +125,8 @@ export function ReviewerDashboard() {
             </div>
             <TrendingUp className="w-5 h-5 text-amber-500" />
           </div>
-          <div className="text-3xl font-semibold text-slate-900">{pendingReview.length}</div>
-          <div className="text-sm text-slate-600 mt-1">Pending Review</div>
+          <div className="text-3xl font-semibold text-slate-900 dark:text-white">{pendingReview.length}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Pending Review</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-slate-200">
@@ -98,8 +135,8 @@ export function ReviewerDashboard() {
               <CheckCircle className="w-6 h-6 text-emerald-600" />
             </div>
           </div>
-          <div className="text-3xl font-semibold text-slate-900">{approved.length}</div>
-          <div className="text-sm text-slate-600 mt-1">Approved</div>
+          <div className="text-3xl font-semibold text-slate-900 dark:text-white">{approved.length}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Approved</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-slate-200">
@@ -108,8 +145,8 @@ export function ReviewerDashboard() {
               <AlertCircle className="w-6 h-6 text-orange-600" />
             </div>
           </div>
-          <div className="text-3xl font-semibold text-slate-900">{revisionRequested.length}</div>
-          <div className="text-sm text-slate-600 mt-1">Need Revision</div>
+          <div className="text-3xl font-semibold text-slate-900 dark:text-white">{revisionRequested.length}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Need Revision</div>
         </div>
 
         <div className="bg-white rounded-xl p-6 border border-slate-200">
@@ -118,8 +155,8 @@ export function ReviewerDashboard() {
               <FileText className="w-6 h-6 text-blue-600" />
             </div>
           </div>
-          <div className="text-3xl font-semibold text-slate-900">{myWorkpacks.length}</div>
-          <div className="text-sm text-slate-600 mt-1">Total Assigned</div>
+          <div className="text-3xl font-semibold text-slate-900 dark:text-white">{myWorkpacks.length}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-300 mt-1">Total Assigned</div>
         </div>
       </div>
 
@@ -128,8 +165,8 @@ export function ReviewerDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200">
           <div className="p-6 border-b border-slate-200 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Workpacks Waiting for Review</h2>
-              <p className="text-sm text-slate-600 mt-1">Items requiring your attention</p>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Workpacks Waiting for Review</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Items requiring your attention</p>
             </div>
             <button
               onClick={handleViewAllWorkpacks}
@@ -150,18 +187,18 @@ export function ReviewerDashboard() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-slate-900">{workpack.title}</h3>
+                        <h3 className="font-semibold text-slate-900 dark:text-white">{workpack.title}</h3>
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(workpack.status)}`}>
                           {getStatusText(workpack.status)}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-600 mb-3">{workpack.projectName}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">{workpack.project_name}</p>
                       <div className="flex items-center gap-4 text-xs text-slate-500">
-                        <span>ID: {workpack.id}</span>
+                        <span>ID: {`WP${String(workpack.id).padStart(3, '0')}`}</span>
                         <span>•</span>
-                        <span>Submitted by: {workpack.submittedBy}</span>
+                        <span>Submitted by: {workpack.created_by}</span>
                         <span>•</span>
-                        <span>{new Date(workpack.submittedDate).toLocaleDateString()}</span>
+                        <span>{new Date(workpack.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                     <button 
@@ -190,7 +227,7 @@ export function ReviewerDashboard() {
         {/* Notification Panel */}
         <div className="bg-white rounded-xl border border-slate-200">
           <div className="p-6 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Bell className="w-5 h-5" />
               Notifications
             </h2>
@@ -211,7 +248,7 @@ export function ReviewerDashboard() {
                     }`} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-slate-900 mb-1">{notification.message}</p>
+                    <p className="text-sm text-slate-900 dark:text-white mb-1">{notification.message}</p>
                     <p className="text-xs text-slate-500">{notification.time}</p>
                   </div>
                 </div>
@@ -230,8 +267,8 @@ export function ReviewerDashboard() {
           <div className="p-3 bg-blue-600 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform">
             <FileText className="w-6 h-6 text-white" />
           </div>
-          <h3 className="font-semibold text-slate-900 mb-2">Review Queue</h3>
-          <p className="text-sm text-slate-600">View all workpacks for review</p>
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Review Queue</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-300">View all workpacks for review</p>
         </button>
 
         <button 
@@ -241,8 +278,8 @@ export function ReviewerDashboard() {
           <div className="p-3 bg-emerald-600 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform">
             <CheckCircle className="w-6 h-6 text-white" />
           </div>
-          <h3 className="font-semibold text-slate-900 mb-2">Approved Items</h3>
-          <p className="text-sm text-slate-600">View approved workpacks</p>
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Approved Items</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-300">View approved workpacks</p>
         </button>
 
         <button 
@@ -252,8 +289,8 @@ export function ReviewerDashboard() {
           <div className="p-3 bg-slate-600 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform">
             <AlertCircle className="w-6 h-6 text-white" />
           </div>
-          <h3 className="font-semibold text-slate-900 mb-2">Review History</h3>
-          <p className="text-sm text-slate-600">View past review activities</p>
+          <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Review History</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-300">View past review activities</p>
         </button>
       </div>
     </div>

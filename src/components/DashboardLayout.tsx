@@ -1,31 +1,74 @@
-import { Outlet, useNavigate, useLocation } from 'react-router';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  Package, 
+  Package,
   LayoutDashboard, 
   FileText, 
-  Search, 
-  User,
-  Settings,
-  LogOut,
-  PlusCircle,
-  CheckCircle,
+  Plus, 
+  BarChart3, 
+  Settings, 
+  User, 
+  LogOut, 
+  Moon, 
+  Sun, 
+  Monitor,
   Users,
-  BarChart3,
-  Zap,
-  RefreshCw,
-  ChevronDown
+  Calendar,
+  Menu,
+  X,
+  Search,
+  ChevronDown,
+  CheckCircle,
+  PlusCircle
 } from 'lucide-react';
-import { getCurrentUser } from '../lib/mockData';
-import { useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react';
 import { NotificationDropdown } from './NotificationDropdown';
 import { ProfileDropdown } from './ProfileDropdown';
 
 export function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentUser = getCurrentUser();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showDemoPanel, setShowDemoPanel] = useState(true);
+ const [currentUser, setCurrentUser] = useState<any>(null);
+const [showProfileMenu, setShowProfileMenu] = useState(false);
+const [showDemoPanel, setShowDemoPanel] = useState(true);
+
+
+ useEffect(() => {
+  async function loadCurrentUser() {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      console.error('Auth user error:', authError);
+      return;
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError.message);
+
+      setCurrentUser({
+        name: authData.user.email?.split('@')[0] || 'User',
+        email: authData.user.email || '',
+        role: 'contractor',
+      });
+      return;
+    }
+
+    setCurrentUser({
+      name: profileData.full_name,
+      email: profileData.email,
+      role: profileData.role,
+      avatar_url: profileData.avatar_url,
+    });
+  }
+
+  loadCurrentUser();
+}, []);
 
   const handleLogout = () => {
     navigate('/');
@@ -37,16 +80,25 @@ export function DashboardLayout() {
     window.location.reload();
   };
 
+
   // Navigation items based on role
-  const getNavItems = () => {
-    const baseItems = [
-      { 
-        id: 'dashboard',
-        path: `/dashboard/${currentUser.role}`, 
-        label: 'Dashboard', 
-        icon: LayoutDashboard 
-      },
-    ];
+const getNavItems = () => {
+  if (!currentUser) return null;
+
+ const baseItems = [
+  { 
+    id: 'dashboard',
+    path: `/dashboard/${currentUser.role}`, 
+    label: 'Dashboard', 
+    icon: LayoutDashboard 
+  },
+  {
+    id: 'meetings',
+    path: '/dashboard/meetings',
+    label: 'Meetings',
+    icon: Calendar
+  },
+];
 
     if (currentUser.role === 'contractor') {
       return [
@@ -78,21 +130,23 @@ export function DashboardLayout() {
     return baseItems;
   };
 
+ if (!currentUser) return [];
+
   const navItems = getNavItems();
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
+       <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 flex flex-col">
         {/* Logo */}
-        <div className="p-6 border-b border-slate-200">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-xl">
               <Package className="w-6 h-6 text-white" />
             </div>
             <div>
-              <div className="font-semibold text-slate-900">PACK-D</div>
-              <div className="text-xs text-slate-500 capitalize">{currentUser.role}</div>
+              <div className="font-semibold text-slate-900 dark:text-white dark:text-white">PACK-D</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 capitalize">{currentUser.role}</div>
             </div>
           </div>
         </div>
@@ -109,9 +163,9 @@ export function DashboardLayout() {
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all transform hover:scale-[1.02] ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-700 shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-50'
+                   isActive
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
+                      : 'text-slate-700 dark:text-slate-300 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'animate-pulse' : ''}`} />
@@ -122,18 +176,28 @@ export function DashboardLayout() {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-700">
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-all group"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
+         <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center">
+              {currentUser.avatar_url ? (
+              <img
+                  src={currentUser.avatar_url}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+              />
+       ) : (
+    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+      <User className="w-4 h-4 text-white" />
+    </div>
+  )}
+</div>
               <div className="flex-1 text-left">
-                <div className="text-sm font-medium text-slate-900">{currentUser.name}</div>
-                <div className="text-xs text-slate-500">{currentUser.email}</div>
+               <div className="text-sm font-medium text-slate-900 dark:text-white dark:text-white">{currentUser.name}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{currentUser.email}</div>
               </div>
               <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
             </button>
@@ -150,7 +214,7 @@ export function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="bg-white border-b border-slate-200 px-6 py-4">
+       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Search */}
             <div className="flex-1 max-w-xl">
@@ -159,7 +223,7 @@ export function DashboardLayout() {
                 <input
                   type="text"
                   placeholder="Search workpacks, projects..."
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all text-slate-900 dark:text-white dark:text-white placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -172,7 +236,7 @@ export function DashboardLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6">
+       <main className="flex-1 overflow-auto p-6 bg-slate-50 dark:bg-slate-950">
           <Outlet />
         </main>
       </div>

@@ -1,8 +1,16 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { Package, UserPlus, CheckCircle, Shield, Zap } from 'lucide-react';
-import { setCurrentUserRole } from '../lib/mockData';
+import { useNavigate } from 'react-router-dom';
+import { Package, UserPlus, CheckCircle,Check, Shield, Zap ,Eye, EyeOff, X} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+
+
+interface PasswordStrength {
+  score: number;
+  label: string;
+  color: string;
+  bgColor: string;
+}
 
 export function RegisterScreen() {
   const navigate = useNavigate();
@@ -14,12 +22,136 @@ export function RegisterScreen() {
     role: 'contractor' as 'contractor' | 'reviewer' | 'admin',
     company: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+const [showTermsModal, setShowTermsModal] = useState(false);
+const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentUserRole(formData.role);
-    navigate('/onboarding');
+  const getPasswordStrength = (password: string): PasswordStrength => {
+    if (!password) {
+      return { score: 0, label: '', color: '', bgColor: '' };
+    }
+
+    let score = 0;
+    
+    // Length check
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    
+    // Character variety checks
+    if (/[a-z]/.test(password)) score++; // lowercase
+    if (/[A-Z]/.test(password)) score++; // uppercase
+    if (/[0-9]/.test(password)) score++; // numbers
+    if (/[^a-zA-Z0-9]/.test(password)) score++; // special characters
+
+    if (score <= 2) {
+      return { 
+        score: 1, 
+        label: 'Weak', 
+        color: 'text-red-600',
+        bgColor: 'bg-red-500'
+      };
+    } else if (score <= 4) {
+      return { 
+        score: 2, 
+        label: 'Fair', 
+        color: 'text-amber-600',
+        bgColor: 'bg-amber-500'
+      };
+    } else if (score <= 5) {
+      return { 
+        score: 3, 
+        label: 'Good', 
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-500'
+      };
+    } else {
+      return { 
+        score: 4, 
+        label: 'Strong', 
+        color: 'text-emerald-600',
+        bgColor: 'bg-emerald-500'
+      };
+    }
   };
+
+  const getPasswordRequirements = (password: string) => {
+    return [
+      { 
+        label: 'At least 8 characters', 
+        met: password.length >= 8 
+      },
+      { 
+        label: 'Contains uppercase letter', 
+        met: /[A-Z]/.test(password) 
+      },
+      { 
+        label: 'Contains lowercase letter', 
+        met: /[a-z]/.test(password) 
+      },
+      { 
+        label: 'Contains number', 
+        met: /[0-9]/.test(password) 
+      },
+      { 
+        label: 'Contains special character', 
+        met: /[^a-zA-Z0-9]/.test(password) 
+      },
+    ];
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
+  const passwordRequirements = getPasswordRequirements(formData.password);
+  const allRequirementsMet = passwordRequirements.every(req => req.met);
+
+const handleRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert('Passwords do not match');
+    return;
+  }
+
+  if (formData.password.length < 8) {
+    alert('Password should be at least 8 characters');
+    return;
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email: formData.email,
+    password: formData.password,
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const user = data.user;
+
+  if (!user) {
+    alert('User account created, but no user data returned.');
+    return;
+  }
+
+  const { error: profileError } = await supabase.from('profiles').insert([
+    {
+      id: user.id,
+      full_name: formData.fullName,
+      email: formData.email,
+      role: formData.role,
+      status: 'active',
+    },
+  ]);
+
+  if (profileError) {
+    alert(profileError.message);
+    return;
+  }
+
+
+  navigate(`/dashboard/${formData.role}`);
+};
 
   return (
     <div className="min-h-screen flex">
@@ -32,8 +164,8 @@ export function RegisterScreen() {
               <Package className="w-8 h-8 text-white" />
             </div>
             <div className="ml-3">
-              <h1 className="text-2xl font-semibold text-slate-900">PACK-D</h1>
-              <p className="text-xs text-slate-600">Workpack Management</p>
+              <h1 className="text-2xl font-semibold text-slate-900 ">PACK-D</h1>
+              <p className="text-xs text-slate-600 ">Workpack Management</p>
             </div>
           </div>
 
@@ -44,8 +176,8 @@ export function RegisterScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl font-semibold text-slate-900 mb-2">Create Account</h2>
-            <p className="text-slate-600">Join PACK-D to streamline your workflows</p>
+            <h2 className="text-3xl font-semibold text-slate-900  mb-2">Create Account</h2>
+            <p className="text-slate-600 ">Join PACK-D to streamline your workflows</p>
           </motion.div>
 
           {/* Register Form */}
@@ -58,7 +190,7 @@ export function RegisterScreen() {
           >
             {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 text-slate-900 placeholder:text-slate-400 mb-2">
                 Full Name
               </label>
               <input
@@ -67,23 +199,7 @@ export function RegisterScreen() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="John Smith"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                required
-              />
-            </div>
-
-            {/* Company */}
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-slate-700 mb-2">
-                Company Name
-              </label>
-              <input
-                id="company"
-                type="text"
-                value={formData.company}
-                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                placeholder="Company Inc."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -99,7 +215,7 @@ export function RegisterScreen() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="you@company.com"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -109,31 +225,109 @@ export function RegisterScreen() {
               <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Min. 8 characters"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 space-y-2"
+                >
+                  {/* Strength Bar */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-600" >Password strength:</span>
+                      <span className={`font-semibold ${passwordStrength.color}`}>
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                            level <= passwordStrength.score
+                              ? passwordStrength.bgColor
+                              : 'bg-slate-200'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Requirements Checklist */}
+                  <div className="bg-slate-50 rounded-lg p-3 space-y-1.5">
+                    {passwordRequirements.map((req, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-center gap-2 text-xs"
+                      >
+                        <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-all ${
+                          req.met 
+                            ? 'bg-emerald-100 text-emerald-600' 
+                            : 'bg-slate-200 text-slate-400'
+                        }`}>
+                          {req.met ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <X className="w-3 h-3" />
+                          )}
+                        </div>
+                        <span className={req.met ? 'text-emerald-600 font-medium' : 'text-slate-600'}>
+                          {req.label}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
             </div>
 
+
             {/* Confirm Password */}
-            <div>
+   <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                placeholder="Re-enter password"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  placeholder="Re-enter password"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {/* Role Selection */}
@@ -163,7 +357,7 @@ export function RegisterScreen() {
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
-                  <div className="text-sm font-medium text-slate-900">Reviewer</div>
+                  <div className="text-sm font-medium text-slate-900 ">Reviewer</div>
                   <div className="text-xs text-slate-600 mt-1">Review & approve</div>
                 </button>
                 <button
@@ -182,17 +376,32 @@ export function RegisterScreen() {
             </div>
 
             {/* Terms */}
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="terms"
-                className="mt-1 w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
-                required
-              />
-              <label htmlFor="terms" className="text-sm text-slate-600">
-                I agree to the Terms of Service and Privacy Policy
-              </label>
-            </div>
+         <div className="flex items-start gap-3">
+  <input
+    type="checkbox"
+    id="terms"
+    className="mt-1 w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+    required
+  />
+  <label htmlFor="terms" className="text-sm text-slate-600 leading-6">
+    I agree to the{' '}
+    <button
+      type="button"
+      onClick={() => setShowTermsModal(true)}
+      className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
+    >
+      Terms of Service
+    </button>{' '}
+    and{' '}
+    <button
+      type="button"
+      onClick={() => setShowPrivacyModal(true)}
+      className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium"
+    >
+      Privacy Policy
+    </button>
+  </label>
+</div>
 
             {/* Register Button */}
             <button
@@ -325,10 +534,104 @@ export function RegisterScreen() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="mt-12 text-center text-white/60 text-sm"
           >
-            <p>© 2024 PACK-D. All rights reserved.</p>
+            <p>© 2026 PACK-D. All rights reserved.</p>
           </motion.div>
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+{showTermsModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <h3 className="text-lg font-semibold text-slate-900">Terms of Service</h3>
+        <button
+          type="button"
+          onClick={() => setShowTermsModal(false)}
+          className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="max-h-[70vh] overflow-y-auto px-6 py-5 text-sm text-slate-600 space-y-4">
+        <p>
+          By creating an account, you agree to use PACK-D responsibly and provide
+          accurate registration information.
+        </p>
+        <p>
+          Users are responsible for maintaining the confidentiality of their login
+          credentials and for all activities performed under their account.
+        </p>
+        <p>
+          PACK-D reserves the right to suspend or terminate accounts that violate
+          system policies, misuse the platform, or attempt unauthorized access.
+        </p>
+        <p>
+          The system is provided to support workpack submission, review, approval,
+          and reporting processes within the organization.
+        </p>
+      </div>
+
+      <div className="flex justify-end border-t border-slate-200 px-6 py-4">
+        <button
+          type="button"
+          onClick={() => setShowTermsModal(false)}
+          className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Privacy Policy Modal */}
+{showPrivacyModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <h3 className="text-lg font-semibold text-slate-900">Privacy Policy</h3>
+        <button
+          type="button"
+          onClick={() => setShowPrivacyModal(false)}
+          className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="max-h-[70vh] overflow-y-auto px-6 py-5 text-sm text-slate-600 space-y-4">
+        <p>
+          PACK-D collects basic user information such as name, email, and role for
+          account creation and access management purposes.
+        </p>
+        <p>
+          Your information is used only to support authentication, user management,
+          and system functionality related to workpack operations.
+        </p>
+        <p>
+          We do not share your personal information with unauthorized third parties,
+          and reasonable measures are taken to protect stored user data.
+        </p>
+        <p>
+          By registering, you acknowledge that your information may be processed as
+          part of the platform’s operational and security requirements.
+        </p>
+      </div>
+
+      <div className="flex justify-end border-t border-slate-200 px-6 py-4">
+        <button
+          type="button"
+          onClick={() => setShowPrivacyModal(false)}
+          className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

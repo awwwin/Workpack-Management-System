@@ -4,11 +4,17 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { currentUser, mockWorkspaces } from '../data/mockData';
+import { supabase } from '../data/supabase';
 
-export function TopBar() {
-  const [selectedWorkspace, setSelectedWorkspace] = useState(mockWorkspaces[0]);
+interface TopBarProps {
+  searchQuery: string; 
+  onSearchChange: (value: string) => void;
+}
 
+export function TopBar({searchQuery, onSearchChange} : TopBarProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
       <div className="flex items-center gap-4 flex-1">
@@ -18,6 +24,8 @@ export function TopBar() {
             type="text"
             placeholder="Search projects, tasks, or people..."
             className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>

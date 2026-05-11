@@ -1,26 +1,71 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Package, LogIn, CheckCircle, Users, Shield } from 'lucide-react';
-import { setCurrentUserRole } from '../lib/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginLoading } from './LoginLoading';
+import { supabase } from '../lib/supabase';
 
 export function LoginScreen() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<'contractor' | 'reviewer' | 'admin'>('contractor');
+  const [userRole, setUserRole] = useState<'contractor' | 'reviewer' | 'admin'>('contractor');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentUserRole(selectedRole);
-    setIsLoading(true);
-  };
+ const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setErrorMessage('');
 
-  const handleLoadingComplete = () => {
-    navigate(`/dashboard/${selectedRole}`);
-  };
+  const { data: loginData, error: loginError } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+  if (loginError) {
+    setErrorMessage(loginError.message);
+    return;
+  }
+
+  const user = loginData.user;
+
+  if (!user) {
+    setErrorMessage('Login failed. No user found.');
+    return;
+  }
+
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+if (profileError) {
+  console.log('PROFILE ERROR:', profileError);
+  setErrorMessage(profileError.message);
+  return;
+}
+
+if (!profileData) {
+  setErrorMessage('No profile found for this user.');
+  return;
+}
+
+if (profileData.role !== selectedRole) {
+  setErrorMessage(`This account is registered as ${profileData.role}, not ${selectedRole}.`);
+  await supabase.auth.signOut();
+  return;
+}
+
+setUserRole(profileData.role);
+setIsLoading(true);
+ };
+
+const handleLoadingComplete = () => {
+  navigate(`/dashboard/${userRole}`);
+};
 
   return (
     <>
@@ -38,8 +83,8 @@ export function LoginScreen() {
                 <Package className="w-8 h-8 text-white" />
               </div>
               <div className="ml-3">
-                <h1 className="text-2xl font-semibold text-slate-900">PACK-D</h1>
-                <p className="text-xs text-slate-600">Workpack Management</p>
+                <h1 className="text-2xl font-semibold text-slate-900 ">PACK-D</h1>
+                <p className="text-xs text-slate-600 ">Workpack Management</p>
               </div>
             </div>
 
@@ -51,7 +96,7 @@ export function LoginScreen() {
               transition={{ duration: 0.5 }}
             >
               <h2 className="text-3xl font-semibold text-slate-900 mb-2">Welcome back</h2>
-              <p className="text-slate-600">Sign in to your account to continue</p>
+              <p className="text-slate-600 ">Sign in to your account to continue</p>
             </motion.div>
 
             {/* Login Form */}
@@ -64,7 +109,7 @@ export function LoginScreen() {
             >
               {/* Email Input */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700  mb-2">
                   Email Address
                 </label>
                 <input
@@ -73,14 +118,14 @@ export function LoginScreen() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   required
                 />
               </div>
 
               {/* Password Input */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-slate-700  mb-2">
                   Password
                 </label>
                 <input
@@ -89,7 +134,7 @@ export function LoginScreen() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -106,7 +151,7 @@ export function LoginScreen() {
                     className={`py-3 px-4 rounded-xl border-2 transition-all ${
                       selectedRole === 'contractor'
                         ? 'border-blue-500 bg-blue-50 text-blue-700 scale-105'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        : 'border-slate-200 bg-white text-slate-700  hover:border-slate-300'
                     }`}
                   >
                     <div className="text-sm font-medium">Contractor</div>
@@ -128,7 +173,7 @@ export function LoginScreen() {
                     className={`py-3 px-4 rounded-xl border-2 transition-all ${
                       selectedRole === 'admin'
                         ? 'border-blue-500 bg-blue-50 text-blue-700 scale-105'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        : 'border-slate-200 bg-white text-slate-700  hover:border-slate-300'
                     }`}
                   >
                     <div className="text-sm font-medium">Admin</div>
@@ -140,7 +185,7 @@ export function LoginScreen() {
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
                   <input type="checkbox" className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
-                  <span className="ml-2 text-sm text-slate-600">Remember me</span>
+                  <span className="ml-2 text-sm text-slate-600 ">Remember me</span>
                 </label>
                 <button type="button" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                   Forgot password?
@@ -155,6 +200,10 @@ export function LoginScreen() {
                 <LogIn className="w-4 h-4" />
                 Sign In
               </button>
+
+              {errorMessage && (
+  <p className="text-red-600 text-sm mt-3">{errorMessage}</p>
+)}
             </motion.form>
 
             {/* Register Link */}
@@ -164,7 +213,7 @@ export function LoginScreen() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 ">
                 Don't have an account?{' '}
                 <button
                   onClick={() => navigate('/register')}
@@ -278,7 +327,7 @@ export function LoginScreen() {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-12 text-center text-white/60 text-sm"
             >
-              <p>© 2024 PACK-D. All rights reserved.</p>
+              <p>© 2026 PACK-D. All rights reserved.</p>
             </motion.div>
           </div>
         </div>

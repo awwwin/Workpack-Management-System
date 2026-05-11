@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
+import { supabase } from '../lib/supabase';
 type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
@@ -11,17 +11,42 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme');
-    return (saved as Theme) || 'light';
-  });
-
+  const [theme, setThemeState] = useState<Theme>('light');
   const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    // Save to localStorage
-    localStorage.setItem('theme', theme);
+  async function loadTheme() {
+    const { data: authData } = await supabase.auth.getUser();
 
+    if (!authData.user) {
+      setThemeState('light');
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('theme')
+      .eq('id', authData.user.id)
+      .single();
+
+    setThemeState((profile?.theme as Theme) || 'light');
+  }
+
+  loadTheme();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(() => {
+    loadTheme();
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}, []);
+
+  useEffect(() => {
+   
     // Calculate effective theme
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -38,19 +63,26 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
-  useEffect(() => {
-    // Apply theme to document
-    if (effectiveTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [effectiveTheme]);
+useEffect(() => {
+  const root = document.documentElement;
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-  };
+  root.classList.remove('light', 'dark');
 
+  root.classList.add(effectiveTheme);
+}, [effectiveTheme]);
+
+const setTheme = async (newTheme: Theme) => {
+  setThemeState(newTheme);
+
+  const { data: authData } = await supabase.auth.getUser();
+
+  if (!authData.user) return;
+
+  await supabase
+    .from('profiles')
+    .update({ theme: newTheme })
+    .eq('id', authData.user.id);
+};
   return (
     <ThemeContext.Provider value={{ theme, setTheme, effectiveTheme }}>
       {children}

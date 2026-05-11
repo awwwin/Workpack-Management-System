@@ -57,8 +57,8 @@ export function SystemSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">System Settings</h1>
-          <p className="text-sm text-slate-600 mt-1">Configure system preferences and global settings</p>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">System Settings</h1>
+          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Configure system preferences and global settings</p>
         </div>
         <button
           onClick={handleSaveSettings}
@@ -79,7 +79,7 @@ export function SystemSettings() {
               className={`py-4 px-2 border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'general'
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
+                  : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
               }`}
             >
               <span className="font-medium flex items-center gap-2">
@@ -92,7 +92,7 @@ export function SystemSettings() {
               className={`py-4 px-2 border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'notifications'
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
+                  : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
               }`}
             >
               <span className="font-medium flex items-center gap-2">
@@ -105,7 +105,7 @@ export function SystemSettings() {
               className={`py-4 px-2 border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'security'
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
+                  : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
               }`}
             >
               <span className="font-medium flex items-center gap-2">
@@ -118,7 +118,7 @@ export function SystemSettings() {
               className={`py-4 px-2 border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'workflow'
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
+                  : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
               }`}
             >
               <span className="font-medium flex items-center gap-2">
@@ -131,7 +131,7 @@ export function SystemSettings() {
               className={`py-4 px-2 border-b-2 transition-all whitespace-nowrap ${
                 activeTab === 'integrations'
                   ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-slate-600 hover:text-slate-900'
+                  : 'border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
               }`}
             >
               <span className="font-medium flex items-center gap-2">
@@ -152,11 +152,11 @@ export function SystemSettings() {
               className="space-y-6"
             >
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">General Configuration</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">General Configuration</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       System Name
                     </label>
                     <input
@@ -170,7 +170,7 @@ export function SystemSettings() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-900 mb-2">
+                      <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                         <Globe className="w-4 h-4 inline mr-2" />
                         Timezone
                       </label>
@@ -188,7 +188,7 @@ export function SystemSettings() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-900 mb-2">
+                      <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                         <Clock className="w-4 h-4 inline mr-2" />
                         Date Format
                       </label>
@@ -205,7 +205,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Globe className="w-4 h-4 inline mr-2" />
                       Language
                     </label>
@@ -224,17 +224,17 @@ export function SystemSettings() {
               </div>
 
               <div className="border-t border-slate-200 pt-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">System Branding</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">System Branding</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Palette className="w-4 h-4 inline mr-2" />
                       Logo Upload
                     </label>
                     <div className="flex items-center gap-4">
                       <button 
                         onClick={() => showToast('Logo upload coming soon!', 'info')}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-all text-sm font-medium"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-200 transition-all text-sm font-medium"
                       >
                         <Upload className="w-4 h-4" />
                         Upload Logo
@@ -255,7 +255,7 @@ export function SystemSettings() {
               className="space-y-6"
             >
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Notification Preferences</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Notification Preferences</h3>
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
@@ -264,8 +264,8 @@ export function SystemSettings() {
                         <Mail className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Email Notifications</p>
-                        <p className="text-sm text-slate-600">Receive email updates for important events</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Receive email updates for important events</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -285,8 +285,8 @@ export function SystemSettings() {
                         <Bell className="w-5 h-5 text-purple-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Push Notifications</p>
-                        <p className="text-sm text-slate-600">Get real-time browser notifications</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Push Notifications</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Get real-time browser notifications</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -306,8 +306,8 @@ export function SystemSettings() {
                         <FileText className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Weekly Reports</p>
-                        <p className="text-sm text-slate-600">Receive weekly activity summaries</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Weekly Reports</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Receive weekly activity summaries</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -327,8 +327,8 @@ export function SystemSettings() {
                         <AlertCircle className="w-5 h-5 text-red-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Critical Alerts</p>
-                        <p className="text-sm text-slate-600">Immediate notifications for critical issues</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Critical Alerts</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Immediate notifications for critical issues</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -354,7 +354,7 @@ export function SystemSettings() {
               className="space-y-6"
             >
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Security Configuration</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Security Configuration</h3>
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
@@ -363,8 +363,8 @@ export function SystemSettings() {
                         <Shield className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Two-Factor Authentication</p>
-                        <p className="text-sm text-slate-600">Require 2FA for all users</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Two-Factor Authentication</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Require 2FA for all users</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -379,7 +379,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Clock className="w-4 h-4 inline mr-2" />
                       Session Timeout (minutes)
                     </label>
@@ -393,7 +393,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Lock className="w-4 h-4 inline mr-2" />
                       Password Expiry (days)
                     </label>
@@ -407,7 +407,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <AlertCircle className="w-4 h-4 inline mr-2" />
                       Maximum Login Attempts
                     </label>
@@ -432,7 +432,7 @@ export function SystemSettings() {
               className="space-y-6"
             >
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Workflow Configuration</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Workflow Configuration</h3>
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
@@ -441,8 +441,8 @@ export function SystemSettings() {
                         <CheckCircle className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Auto-Approval for Low Risk</p>
-                        <p className="text-sm text-slate-600">Automatically approve low-risk workpacks</p>
+                        <p className="font-medium text-slate-900 dark:text-white">Auto-Approval for Low Risk</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Automatically approve low-risk workpacks</p>
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -457,7 +457,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Clock className="w-4 h-4 inline mr-2" />
                       Review Deadline (days)
                     </label>
@@ -471,7 +471,7 @@ export function SystemSettings() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       <Bell className="w-4 h-4 inline mr-2" />
                       Reminder Frequency
                     </label>
@@ -500,7 +500,7 @@ export function SystemSettings() {
               className="space-y-6"
             >
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">External Integrations</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">External Integrations</h3>
                 
                 <div className="space-y-4">
                   <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
@@ -510,9 +510,9 @@ export function SystemSettings() {
                           <Database className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-slate-900">Cloud Storage</h4>
-                          <p className="text-sm text-slate-600 mt-1">Connect to external storage providers</p>
-                          <span className="inline-block mt-2 px-2 py-1 bg-slate-200 text-slate-700 rounded text-xs font-medium">Not Connected</span>
+                          <h4 className="font-semibold text-slate-900 dark:text-white">Cloud Storage</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Connect to external storage providers</p>
+                          <span className="inline-block mt-2 px-2 py-1 bg-slate-200 text-slate-700 dark:text-slate-300 rounded text-xs font-medium">Not Connected</span>
                         </div>
                       </div>
                       <button 
@@ -531,14 +531,14 @@ export function SystemSettings() {
                           <Mail className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-slate-900">Email Service</h4>
-                          <p className="text-sm text-slate-600 mt-1">Configure SMTP for email notifications</p>
+                          <h4 className="font-semibold text-slate-900 dark:text-white">Email Service</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Configure SMTP for email notifications</p>
                           <span className="inline-block mt-2 px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-medium">Connected</span>
                         </div>
                       </div>
                       <button 
                         onClick={() => showToast('Email configuration coming soon!', 'info')}
-                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all text-sm font-medium"
+                        className="px-4 py-2 bg-slate-100 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 transition-all text-sm font-medium"
                       >
                         Configure
                       </button>
@@ -552,9 +552,9 @@ export function SystemSettings() {
                           <Zap className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-slate-900">Webhooks</h4>
-                          <p className="text-sm text-slate-600 mt-1">Set up webhook integrations for external systems</p>
-                          <span className="inline-block mt-2 px-2 py-1 bg-slate-200 text-slate-700 rounded text-xs font-medium">Not Connected</span>
+                          <h4 className="font-semibold text-slate-900 dark:text-white">Webhooks</h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Set up webhook integrations for external systems</p>
+                          <span className="inline-block mt-2 px-2 py-1 bg-slate-200 text-slate-700 dark:text-slate-300 rounded text-xs font-medium">Not Connected</span>
                         </div>
                       </div>
                       <button 

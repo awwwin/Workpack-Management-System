@@ -15,6 +15,7 @@ import { ProfilePage } from "./components/ProfilePage";
 import { SettingsPage } from "./components/SettingsPage";
 import { UserManagement } from "./components/UserManagement";
 import { SystemSettings } from "./components/SystemSettings";
+import { MeetingsPage } from "./components/MeetingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "settings", Component: SettingsPage },
       { path: "user-management", Component: UserManagement },
       { path: "system-settings", Component: SystemSettings },
+       { path: "meetings", Component: MeetingsPage },
     ],
   },
 ]);

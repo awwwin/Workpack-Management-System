@@ -168,7 +168,7 @@ export function LoginLoading({ onComplete }: LoginLoadingProps) {
           {steps[currentStep]}
           <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
         </motion.h2>
-        <p className="text-slate-600">Please wait a moment</p>
+        <p className="text-slate-600 ">Please wait a moment</p>
       </div>
 
       {/* Progress Bar at Bottom */}
@@ -176,7 +176,7 @@ export function LoginLoading({ onComplete }: LoginLoadingProps) {
         <div className="max-w-md mx-auto">
           {/* Progress Text */}
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-slate-600">Loading</span>
+            <span className="text-sm text-slate-600 ">Loading</span>
             <motion.span
               key={Math.floor(progress)}
               initial={{ scale: 1.2 }}

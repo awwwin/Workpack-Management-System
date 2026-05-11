@@ -36,10 +36,10 @@ export interface TimelineEvent {
 }
 
 export const mockUsers: User[] = [
-  { id: '1', name: 'John Smith', email: 'john.smith@example.com', role: 'contractor' },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah.johnson@example.com', role: 'reviewer' },
-  { id: '3', name: 'Michael Chen', email: 'michael.chen@example.com', role: 'reviewer' },
-  { id: '4', name: 'Admin User', email: 'admin@example.com', role: 'admin' },
+  { id: '1', name: 'Abdul Aiman bin Syamsul', email: 'abdaiman@packd.com', role: 'contractor' },
+  { id: '2', name: 'Siti Kamilia', email: 'sitikamilia@packd.com', role: 'reviewer' },
+  { id: '3', name: 'Michael Chen', email: 'michael.chen@packd.com', role: 'reviewer' },
+  { id: '4', name: 'Admin', email: 'admin@packd.com', role: 'admin' },
 ];
 
 export const mockWorkpacks: Workpack[] = [
@@ -86,7 +86,7 @@ export const mockWorkpacks: Workpack[] = [
       }
     ],
     timeline: [
-      { id: 't4', event: 'Workpack Created', user: 'John Smith', date: '2024-02-04', status: 'draft' },
+      { id: 't4', event: 'Workpack Created', user: 'Abdul Aiman bin Syamsul', date: '2024-02-04', status: 'draft' },
       { id: 't5', event: 'Submitted for Review', user: 'John Smith', date: '2024-02-05', status: 'pending_review' },
       { id: 't6', event: 'Approved', user: 'Michael Chen', date: '2024-02-06', status: 'approved' },
     ]
@@ -99,20 +99,20 @@ export const mockWorkpacks: Workpack[] = [
     status: 'revision_requested',
     submittedBy: 'John Smith',
     submittedDate: '2024-02-08',
-    assignedReviewer: 'Sarah Johnson',
+    assignedReviewer: 'Siti Kamilia',
     documents: ['electrical_plans.pdf', 'load_calculations.pdf'],
     comments: [
       {
         id: 'c3',
-        author: 'Sarah Johnson',
+        author: 'Siti Kamilia',
         content: 'Load calculations need to be revised according to the updated building specifications.',
         date: '2024-02-09',
       }
     ],
     timeline: [
-      { id: 't7', event: 'Workpack Created', user: 'John Smith', date: '2024-02-07', status: 'draft' },
-      { id: 't8', event: 'Submitted for Review', user: 'John Smith', date: '2024-02-08', status: 'pending_review' },
-      { id: 't9', event: 'Revision Requested', user: 'Sarah Johnson', date: '2024-02-09', status: 'revision_requested' },
+      { id: 't7', event: 'Workpack Created', user: 'Abdul Aiman bin Syamsul', date: '2024-02-07', status: 'draft' },
+      { id: 't8', event: 'Submitted for Review', user: 'Abdul Aiman bin Syamsul', date: '2024-02-08', status: 'pending_review' },
+      { id: 't9', event: 'Revision Requested', user: 'Siti Kamilia', date: '2024-02-09', status: 'revision_requested' },
     ]
   },
   {
@@ -121,12 +121,12 @@ export const mockWorkpacks: Workpack[] = [
     projectName: 'Downtown Office Complex',
     description: 'Rough-in plumbing work including water supply lines, drainage systems, and fixture preparations.',
     status: 'draft',
-    submittedBy: 'John Smith',
+    submittedBy: 'Abdul Aiman bin Syamsul',
     submittedDate: '2024-02-12',
     documents: ['plumbing_layout.pdf'],
     comments: [],
     timeline: [
-      { id: 't10', event: 'Workpack Created', user: 'John Smith', date: '2024-02-12', status: 'draft' },
+      { id: 't10', event: 'Workpack Created', user: 'Abdul Aiman bin Syamsul', date: '2024-02-12', status: 'draft' },
     ]
   },
   {
@@ -135,7 +135,7 @@ export const mockWorkpacks: Workpack[] = [
     projectName: 'Riverside Shopping Mall',
     description: 'Installation of sprinkler systems, fire alarms, and emergency response systems throughout the facility.',
     status: 'rejected',
-    submittedBy: 'John Smith',
+    submittedBy: 'Abdul Aiman bin Syamsul',
     submittedDate: '2024-02-03',
     assignedReviewer: 'Michael Chen',
     documents: ['fire_protection_plan.pdf'],
@@ -148,8 +148,8 @@ export const mockWorkpacks: Workpack[] = [
       }
     ],
     timeline: [
-      { id: 't11', event: 'Workpack Created', user: 'John Smith', date: '2024-02-02', status: 'draft' },
-      { id: 't12', event: 'Submitted for Review', user: 'John Smith', date: '2024-02-03', status: 'pending_review' },
+      { id: 't11', event: 'Workpack Created', user: 'Abdul Aiman bin Syamsul', date: '2024-02-02', status: 'draft' },
+      { id: 't12', event: 'Submitted for Review', user: 'Abdul Aiman bin Syamsul', date: '2024-02-03', status: 'pending_review' },
       { id: 't13', event: 'Rejected', user: 'Michael Chen', date: '2024-02-04', status: 'rejected' },
     ]
   },

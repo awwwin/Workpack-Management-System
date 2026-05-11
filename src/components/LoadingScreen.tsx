@@ -251,7 +251,7 @@ export function LoadingScreen({ userRole }: LoadingScreenProps) {
                   </motion.div>
                   <motion.span
                     className={`flex-1 font-medium ${
-                      isActive || isCompleted ? 'text-slate-900' : 'text-slate-400'
+                      isActive || isCompleted ? 'text-slate-900 ' : 'text-slate-400'
                     }`}
                     animate={isActive ? { opacity: [0.7, 1, 0.7] } : {}}
                     transition={{ duration: 1.5, repeat: Infinity }}
