@@ -47,7 +47,10 @@ export function MeetingList({ meetings, onEdit, onCancel, onView }: MeetingListP
     );
   };
 
-  const getMeetingTypeIcon = (type: Meeting['meetingType']) => {
+   const getMeetingTypeIcon = (type?: string) => {
+    if (!type) {
+  return <Video className="w-4 h-4 text-slate-400" />;
+}
     if (type === 'virtual') {
       return <Video className="w-4 h-4 text-blue-600" />;
     } else if (type === 'in-person') {
@@ -62,17 +65,17 @@ export function MeetingList({ meetings, onEdit, onCancel, onView }: MeetingListP
     }
   };
 
-  const getMeetingTypeLabel = (type: Meeting['meetingType']) => {
-    return type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ');
-  };
+ const getMeetingTypeLabel = (type?: string) => {
+  if (!type) return 'Unknown';
+
+  return type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ');
+};
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Review Meetings</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Scheduled workpack review meetings</p>
         </div>
       </div>
 
@@ -159,9 +162,14 @@ export function MeetingList({ meetings, onEdit, onCancel, onView }: MeetingListP
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
-                        {meeting.reviewer.split(' ').map(n => n[0]).join('')}
+                        {(meeting.reviewer || 'Reviewer')
+                             .split(' ')
+                             .map((n: string) => n[0])
+                             .join('')}
                       </div>
-                      <span className="text-sm text-slate-900 dark:text-white">{meeting.reviewer}</span>
+                     <span className="text-sm text-slate-900 dark:text-white">
+                           {meeting.reviewer || meeting.reviewer_name || 'Reviewer'}
+                     </span>
                     </div>
                   </td>
 
@@ -181,6 +189,18 @@ export function MeetingList({ meetings, onEdit, onCancel, onView }: MeetingListP
                   {/* Actions */}
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
+                      {meeting.link && (
+  <button
+    onClick={() => window.open(meeting.link, '_blank')}
+    className="p-2 text-slate-600 dark:text-slate-300 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-all"
+    title="Join Meeting"
+  >
+    <div className="flex items-center gap-1">
+  <Video className="w-4 h-4" />
+  <span className="text-xs font-medium">Join</span>
+</div> 
+  </button>
+)}
                       <button
                         onClick={() => onView?.(meeting)}
                         className="p-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"

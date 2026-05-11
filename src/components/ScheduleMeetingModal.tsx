@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Calendar, Clock, Users, Video, Link as LinkIcon, FileText, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,6 +8,7 @@ interface ScheduleMeetingModalProps {
   onSubmit: (meeting: MeetingData) => void;
   workpacks: any[];
   reviewers: any[];
+  editingMeeting?: any;
 }
 
 export interface MeetingData {
@@ -28,6 +29,7 @@ export function ScheduleMeetingModal({
   onSubmit,
   workpacks,
   reviewers,
+  editingMeeting,
 }: ScheduleMeetingModalProps) {
 
 const [formData, setFormData] = useState<MeetingData>({
@@ -42,23 +44,39 @@ const [formData, setFormData] = useState<MeetingData>({
   notes: '',
 });
 
+useEffect(() => {
+  if (editingMeeting) {
+    setFormData({
+      workpackId: editingMeeting.workpack_id || editingMeeting.workpackId || '',
+      title: editingMeeting.title || '',
+      date: editingMeeting.meeting_date || editingMeeting.date || '',
+      time: editingMeeting.meeting_time || editingMeeting.time || '',
+      reviewerId: editingMeeting.reviewer_id || editingMeeting.reviewerId || '',
+      meetingType: editingMeeting.meeting_type || editingMeeting.meetingType || 'virtual',
+      link: editingMeeting.link || '',
+      location: editingMeeting.location || '',
+      notes: editingMeeting.notes || '',
+    });
+  }
+}, [editingMeeting]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
     // Reset form
-setFormData({
-  workpackId: '',
-  title: '',
-  date: '',
-  time: '',
-  reviewerId: '',
-  meetingType: 'virtual',
-  link: '',
-  location: '',
-  notes: '',
-});
+    setFormData({
+          workpackId: '',
+          title: '',
+          date: '',
+          time: '',
+          reviewerId: '',
+          meetingType: 'virtual',
+          link: '',
+          location: '',
+          notes: '',
+      });
     onClose();
-  };
+   };
 
   const handleChange = (field: keyof MeetingData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -81,7 +99,7 @@ setFormData({
                   <Calendar className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Schedule Review Meeting</h2>
+                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{editingMeeting ? 'Edit Review Meeting' : 'Schedule Review Meeting'}</h2>
                   <p className="text-sm text-slate-600 dark:text-slate-300">Set up a meeting to review workpack progress</p>
                 </div>
               </div>
@@ -284,7 +302,7 @@ setFormData({
                className="px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all font-medium"
               >
                 <Save className="w-4 h-4" />
-                Schedule Meeting
+                {editingMeeting ? 'Update Meeting' : 'Schedule Meeting'}
               </button>
             </div>
           </motion.div>

@@ -13,6 +13,9 @@ export function MeetingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showToast, ToastContainer } = useToast();
   const [meetings, setMeetings] = useState<any[]>([]);
+  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<any>(null);
 
   const loadMeetings = async () => {
   const { data, error } = await supabase
@@ -96,30 +99,41 @@ if (selectedDate < today) {
   loadMeetings();
 };
 
-  const handleEditMeeting = (meeting: any) => {
-    console.log('Editing meeting:', meeting);
-    showToast('Edit feature coming soon!', 'info');
-  };
+const handleEditMeeting = (meeting: any) => {
+  setEditingMeeting(meeting);
+  setIsModalOpen(true);
+};
 
 const handleCancelMeeting = async (meetingId: string) => {
+
   const { error } = await supabase
     .from('meetings')
-    .update({ status: 'cancelled' })
-    .eq('id', Number(meetingId));
+    .update({
+      status: 'cancelled',
+    })
+    .eq('id', meetingId);
 
   if (error) {
-    showToast(error.message, 'error');
+    console.error(error);
+    showToast('Failed to cancel meeting', 'error');
     return;
   }
 
+  setMeetings((prev) =>
+    prev.map((m) =>
+      m.id === meetingId
+        ? { ...m, status: 'cancelled' }
+        : m
+    )
+  );
+
   showToast('Meeting cancelled successfully', 'success');
-  loadMeetings();
 };
 
-  const handleViewMeeting = (meeting: any) => {
-    console.log('Viewing meeting:', meeting);
-    showToast('Opening meeting details...', 'info');
-  };
+const handleViewMeeting = (meeting: any) => {
+  setSelectedMeeting(meeting);
+  setIsViewModalOpen(true);
+};
 
   return (
     <div className="space-y-6 text-slate-900 dark:text-white">
@@ -160,7 +174,10 @@ const handleCancelMeeting = async (meetingId: string) => {
 
           {/* Schedule Button */}
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+                 setEditingMeeting(null);
+                 setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition-all shadow-sm hover:shadow-md transform hover:scale-105"
           >
             <Plus className="w-5 h-5" />
@@ -191,7 +208,46 @@ const handleCancelMeeting = async (meetingId: string) => {
   onSubmit={handleScheduleMeeting}
   workpacks={workpacks}
   reviewers={reviewers}
+  editingMeeting={editingMeeting}
 />
+
+{isViewModalOpen && selectedMeeting && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl w-full max-w-lg">
+
+      <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
+        Meeting Details
+      </h2>
+
+      <div className="space-y-3 text-sm">
+        <p><strong>Title:</strong> {selectedMeeting.title}</p>
+        <p><strong>Date:</strong> {selectedMeeting.date}</p>
+        <p><strong>Time:</strong> {selectedMeeting.time}</p>
+        <p><strong>Reviewer:</strong> {selectedMeeting.reviewer}</p>
+        <p><strong>Status:</strong> {selectedMeeting.status}</p>
+        <p><strong>Type:</strong> {selectedMeeting.meetingType}</p>
+      </div>
+
+      {selectedMeeting.link && (
+        <button
+          onClick={() => window.open(selectedMeeting.link, '_blank')}
+          className="mt-5 px-4 py-2 bg-blue-600 text-white rounded-xl"
+        >
+          Join Meeting
+        </button>
+      )}
+
+      <div className="mt-6 flex justify-end">
+        <button
+          onClick={() => setIsViewModalOpen(false)}
+          className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-xl"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

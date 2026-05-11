@@ -161,14 +161,14 @@ const handleSave = async () => {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 text-slate-900 dark:text-white">
       <ToastContainer />
 
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 hover:bg-slate-100 rounded-xl transition-all"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
         >
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
@@ -188,7 +188,7 @@ const handleSave = async () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Tabs */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-slate-200 p-2">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -197,8 +197,8 @@ const handleSave = async () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     activeTab === tab.id
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -216,7 +216,7 @@ const handleSave = async () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-xl border border-slate-200 p-6 space-y-6"
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6 space-y-6"
           >
             {/* General Settings */}
             {activeTab === 'general' && (
@@ -232,7 +232,7 @@ const handleSave = async () => {
                       <select
                         value={settings.language}
                         onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="en">English</option>
                         <option value="ms">Bahasa Melayu</option>
@@ -243,31 +243,33 @@ const handleSave = async () => {
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Timezone
                       </label>
-<div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 dark:text-slate-300">
-  Malaysia Time (MYT)
-</div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Theme
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {['light', 'dark'].map((t) => (
-                          <button
-                            key={t}
-                            onClick={() => setTheme(t as any)}
-                            className={`px-4 py-3 rounded-xl border-2 transition-all capitalize ${
-                              theme === t
-                                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                : 'border-slate-200 bg-white hover:border-slate-300'
-                            }`}
-                          >
-                            {t}
-                          </button>
-                        ))}
+                    <div className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300">
+                           Malaysia Time (MYT)
                       </div>
                     </div>
+
+<div>
+  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+    Theme
+  </label>
+
+  <div className="grid grid-cols-2 gap-3">
+    {['light', 'dark'].map((t) => (
+      <button
+        key={t}
+        type="button"
+        onClick={() => setTheme(t as 'light' | 'dark')}
+        className={`px-4 py-3 rounded-xl border-2 transition-all capitalize ${
+          theme === t
+            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white hover:border-slate-300 dark:hover:border-slate-600'
+        }`}
+      >
+        {t}
+      </button>
+    ))}
+  </div>
+</div>
                   </div>
                 </div>
               </>
@@ -290,7 +292,7 @@ const handleSave = async () => {
                           type={showPassword ? 'text' : 'password'}
                           value={settings.currentPassword}
                           onChange={(e) => setSettings({ ...settings, currentPassword: e.target.value })}
-                          className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full pl-10 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <button
                           type="button"
@@ -312,7 +314,7 @@ const handleSave = async () => {
                           type={showPassword ? 'text' : 'password'}
                           value={settings.newPassword}
                           onChange={(e) => setSettings({ ...settings, newPassword: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -327,13 +329,13 @@ const handleSave = async () => {
                           type={showPassword ? 'text' : 'password'}
                           value={settings.confirmPassword}
                           onChange={(e) => setSettings({ ...settings, confirmPassword: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-200">
-                      <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                      <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                         <div className="flex items-center gap-3">
                           <Shield className="w-5 h-5 text-emerald-600" />
                           <div>
@@ -361,7 +363,7 @@ const handleSave = async () => {
                   <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Notification Preferences</h3>
                   
                   <div className="space-y-3">
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div className="flex items-center gap-3">
                         <Mail className="w-5 h-5 text-blue-600" />
                         <div>
@@ -377,7 +379,7 @@ const handleSave = async () => {
                       />
                     </label>
 
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div className="flex items-center gap-3">
                         <Bell className="w-5 h-5 text-purple-600" />
                         <div>
@@ -393,7 +395,7 @@ const handleSave = async () => {
                       />
                     </label>
 
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div className="flex items-center gap-3">
                         <Bell className="w-5 h-5 text-amber-600" />
                         <div>
@@ -409,7 +411,7 @@ const handleSave = async () => {
                       />
                     </label>
 
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div className="flex items-center gap-3">
                         <Mail className="w-5 h-5 text-emerald-600" />
                         <div>
@@ -436,7 +438,7 @@ const handleSave = async () => {
                   <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Display Preferences</h3>
                   
                   <div className="space-y-4">
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div>
                         <div className="font-medium text-slate-900 dark:text-white">Compact View</div>
                         <div className="text-sm text-slate-600 dark:text-slate-300">Show more items on screen</div>
@@ -449,7 +451,7 @@ const handleSave = async () => {
                       />
                     </label>
 
-                    <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <label className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
                       <div>
                         <div className="font-medium text-slate-900 dark:text-white">Auto-Save</div>
                         <div className="text-sm text-slate-600 dark:text-slate-300">Automatically save drafts</div>
@@ -469,7 +471,7 @@ const handleSave = async () => {
                       <select
                         value={settings.defaultView}
                         onChange={(e) => setSettings({ ...settings, defaultView: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="dashboard">Dashboard</option>
                         <option value="workpacks">Workpacks List</option>

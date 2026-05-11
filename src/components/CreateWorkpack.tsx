@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, X, Save, Send, User, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { AlertTriangle } from 'lucide-react';
 import { useToast } from './Toast';
 
 export function CreateWorkpack() {
@@ -12,10 +13,23 @@ export function CreateWorkpack() {
     projectName: '',
     description: '',
     assignedReviewer: '',
+    workpackNumber: '',
+    discipline: '',
+    priority: '',
+    workLocation: '',
+    safetyPermit: '',
+    riskLevel: '',
+    safetyRequirements: '',
   });
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState<'draft' | 'ready' | 'submit'>('draft');
-const [reviewers, setReviewers] = useState<any[]>([])
+  const [reviewers, setReviewers] = useState<any[]>([])
+  const handleChange = (field: string, value: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
 
 useEffect(() => {
   async function loadReviewers() {
@@ -61,6 +75,8 @@ const handleSaveDraft = async () => {
       reviewer_id: formData.assignedReviewer || null,
       status: 'draft',
       created_by: authData.user.id,
+      risk_level: formData.riskLevel,
+      safety_requirements: formData.safetyRequirements,
     },
   ]);
 
@@ -93,6 +109,11 @@ const { data: newWorkpack, error } = await supabase
       reviewer_id: formData.assignedReviewer,
       status: 'pending_review',
       created_by: authData.user.id,
+      workpack_number: formData.workpackNumber,
+      discipline: formData.discipline,
+      priority: formData.priority,
+     work_location: formData.workLocation,
+     safety_permit: formData.safetyPermit,
     },
   ])
   .select()
@@ -222,6 +243,101 @@ await supabase.from('notifications').insert([
               required
             />
           </div>
+            
+
+          {/* Workpack Number */}
+<div>
+  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+    Workpack Number *
+  </label>
+  <input
+    type="text"
+    value={formData.workpackNumber}
+    onChange={(e) => setFormData({ ...formData, workpackNumber: e.target.value })}
+    placeholder="e.g., WP-2026-001"
+    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    required
+  />
+</div>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {/* Discipline */}
+  <div>
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+      Discipline *
+    </label>
+    <select
+      value={formData.discipline}
+      onChange={(e) => setFormData({ ...formData, discipline: e.target.value })}
+      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    >
+      <option value="">Select discipline</option>
+      <option value="Structural">Structural</option>
+      <option value="Mechanical">Mechanical</option>
+      <option value="Electrical">Electrical</option>
+      <option value="Piping">Piping</option>
+      <option value="Instrumentation">Instrumentation</option>
+      <option value="Civil">Civil</option>
+      <option value="Inspection">Inspection</option>
+    </select>
+  </div>
+
+  {/* Priority */}
+  <div>
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+      Priority *
+    </label>
+    <select
+      value={formData.priority}
+      onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    >
+      <option value="">Select priority</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+      <option value="Critical">Critical</option>
+    </select>
+  </div>
+</div>
+
+{/* Work Location */}
+<div>
+  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+    Work Location / Site Area *
+  </label>
+  <input
+    type="text"
+    value={formData.workLocation}
+    onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
+    placeholder="e.g., Area A-17 / Platform B / Tank Zone"
+    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    required
+  />
+</div>
+
+{/* Safety Permit */}
+<div>
+  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+    Safety Permit Required *
+  </label>
+  <select
+    value={formData.safetyPermit}
+    onChange={(e) => setFormData({ ...formData, safetyPermit: e.target.value })}
+    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    required
+  >
+    <option value="">Select permit requirement</option>
+    <option value="None">None</option>
+    <option value="Hot Work Permit">Hot Work Permit</option>
+    <option value="Confined Space Permit">Confined Space Permit</option>
+    <option value="Electrical Isolation Permit">Electrical Isolation Permit</option>
+    <option value="Working at Height Permit">Working at Height Permit</option>
+  </select>
+</div>
+
 
           {/* Work Description */}
           <div>
@@ -238,6 +354,86 @@ await supabase.from('notifications').insert([
               required
             />
           </div>
+
+        {/* Risk & Safety */}
+<div className="space-y-4">
+
+  <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+    <AlertTriangle className="w-5 h-5 text-amber-600" />
+    Risk & Safety
+  </h3>
+
+  <div>
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+      Risk Level *
+    </label>
+
+    <div className="grid grid-cols-3 gap-3">
+
+      {/* LOW */}
+      <button
+        type="button"
+        onClick={() => handleChange('riskLevel', 'low')}
+        className={`py-3 px-4 rounded-xl border-2 transition-all ${
+          formData.riskLevel === 'low'
+            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+        }`}
+      >
+        <div className="text-sm font-medium">Low Risk</div>
+        <div className="text-xs mt-1">Standard procedures</div>
+      </button>
+
+      {/* MEDIUM */}
+      <button
+        type="button"
+        onClick={() => handleChange('riskLevel', 'medium')}
+        className={`py-3 px-4 rounded-xl border-2 transition-all ${
+          formData.riskLevel === 'medium'
+            ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+        }`}
+      >
+        <div className="text-sm font-medium">Medium Risk</div>
+        <div className="text-xs mt-1">Enhanced safety</div>
+      </button>
+
+      {/* HIGH */}
+      <button
+        type="button"
+        onClick={() => handleChange('riskLevel', 'high')}
+        className={`py-3 px-4 rounded-xl border-2 transition-all ${
+          formData.riskLevel === 'high'
+            ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+        }`}
+      >
+        <div className="text-sm font-medium">High Risk</div>
+        <div className="text-xs mt-1">Special permits</div>
+      </button>
+
+    </div>
+  </div>
+
+  {/* SAFETY REQUIREMENTS */}
+  <div>
+    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+      Safety Requirements *
+    </label>
+
+    <textarea
+      value={formData.safetyRequirements}
+      onChange={(e) =>
+        handleChange('safetyRequirements', e.target.value)
+      }
+      placeholder="List all safety requirements, PPE, permits, and precautions..."
+      rows={4}
+      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    />
+  </div>
+
+</div>
 
           {/* Assigned Reviewer */}
           <div>
