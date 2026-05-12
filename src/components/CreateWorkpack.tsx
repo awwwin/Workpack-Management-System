@@ -72,7 +72,7 @@ const handleSaveDraft = async () => {
       title: formData.title,
       project_name: formData.projectName,
       work_description: formData.description,
-      reviewer_id: formData.assignedReviewer || null,
+      reviewer_id: reviewers.length > 0 ? reviewers[0].id : null,
       status: 'draft',
       created_by: authData.user.id,
       risk_level: formData.riskLevel,
@@ -88,6 +88,8 @@ const handleSaveDraft = async () => {
   showToast('Workpack saved as draft', 'success');
   setTimeout(() => navigate('/dashboard/workpacks'), 1000);
 };
+
+const assignedReviewer = reviewers.length > 0 ? reviewers[0].id : null;
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -106,7 +108,7 @@ const { data: newWorkpack, error } = await supabase
       title: formData.title,
       project_name: formData.projectName,
       work_description: formData.description,
-      reviewer_id: formData.assignedReviewer,
+      reviewer_id: assignedReviewer,
       status: 'pending_review',
       created_by: authData.user.id,
       workpack_number: formData.workpackNumber,
@@ -135,7 +137,7 @@ await supabase.from('notifications').insert([
     read: false,
   },
   {
-    user_id: formData.assignedReviewer,
+    user_id: assignedReviewer,
     title: 'New Assignment',
     message: `You have been assigned to review ${workpackLabel}`,
     type: 'info',
@@ -149,11 +151,19 @@ await supabase.from('notifications').insert([
 };
   // Check form completion for step indicator
   const isFormFilled = formData.title && formData.projectName && formData.description;
-  const isReadyToSubmit = isFormFilled && formData.assignedReviewer;
+  const isReadyToSubmit =
+  isFormFilled &&
+  formData.workpackNumber &&
+  formData.discipline &&
+  formData.priority &&
+  formData.workLocation &&
+  formData.safetyPermit &&
+  formData.riskLevel &&
+  formData.safetyRequirements;
 
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full max-w-none space-y-6">
       <ToastContainer />
       
       {/* Header */}
@@ -211,11 +221,23 @@ await supabase.from('notifications').insert([
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Main Form */}
-       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+          
+          <div className="w-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden divide-y divide-slate-200 dark:divide-slate-700">
+
+        {/* Basic Information */}
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+                Basic Information
+            </h3>
+
+           <div className="space-y-5">
+
+          
           {/* Workpack Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Workpack Title *
+              Workpack Title <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
@@ -231,7 +253,7 @@ await supabase.from('notifications').insert([
           {/* Project Name */}
           <div>
             <label htmlFor="projectName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Project Name *
+              Project Name <span className="text-red-500">*</span>
             </label>
             <input
               id="projectName"
@@ -248,7 +270,7 @@ await supabase.from('notifications').insert([
           {/* Workpack Number */}
 <div>
   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-    Workpack Number *
+    Workpack Number <span className="text-red-500">*</span>
   </label>
   <input
     type="text"
@@ -264,7 +286,7 @@ await supabase.from('notifications').insert([
   {/* Discipline */}
   <div>
     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-      Discipline *
+      Discipline <span className="text-red-500">*</span>
     </label>
     <select
       value={formData.discipline}
@@ -286,7 +308,7 @@ await supabase.from('notifications').insert([
   {/* Priority */}
   <div>
     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-      Priority *
+      Priority <span className="text-red-500">*</span>
     </label>
     <select
       value={formData.priority}
@@ -306,7 +328,7 @@ await supabase.from('notifications').insert([
 {/* Work Location */}
 <div>
   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-    Work Location / Site Area *
+    Work Location / Site Area <span className="text-red-500">*</span>
   </label>
   <input
     type="text"
@@ -321,7 +343,7 @@ await supabase.from('notifications').insert([
 {/* Safety Permit */}
 <div>
   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-    Safety Permit Required *
+    Safety Permit Required <span className="text-red-500">*</span>
   </label>
   <select
     value={formData.safetyPermit}
@@ -337,12 +359,20 @@ await supabase.from('notifications').insert([
     <option value="Working at Height Permit">Working at Height Permit</option>
   </select>
 </div>
+</div>
+</div>
 
+<div className="space-y-5">
 
+{/* Work Details */}
+  <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          Work Details
+    </h3>
           {/* Work Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Work Description *
+              Work Description <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"
@@ -354,22 +384,23 @@ await supabase.from('notifications').insert([
               required
             />
           </div>
+          </div>
 
-        {/* Risk & Safety */}
-<div className="space-y-4">
-
-  <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-    <AlertTriangle className="w-5 h-5 text-amber-600" />
-    Risk & Safety
-  </h3>
+          
+{/* Risk & Safety */}
+  <div className="px-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+      <AlertTriangle className="w-5 h-5 text-amber-600" />
+      Risk & Safety
+    </h3> 
+<div className="space-y-5">
 
   <div>
     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-      Risk Level *
+      Risk Level <span className="text-red-500">*</span>
     </label>
 
     <div className="grid grid-cols-3 gap-3">
-
       {/* LOW */}
       <button
         type="button"
@@ -411,14 +442,13 @@ await supabase.from('notifications').insert([
         <div className="text-sm font-medium">High Risk</div>
         <div className="text-xs mt-1">Special permits</div>
       </button>
-
     </div>
   </div>
 
   {/* SAFETY REQUIREMENTS */}
   <div>
     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-      Safety Requirements *
+      Safety Requirements <span className="text-red-500">*</span>
     </label>
 
     <textarea
@@ -432,40 +462,20 @@ await supabase.from('notifications').insert([
       required
     />
   </div>
-
 </div>
+</div>
+</div> 
 
-          {/* Assigned Reviewer */}
-          <div>
-            <label htmlFor="reviewer" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Select Reviewer *
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <select
-                id="reviewer"
-                value={formData.assignedReviewer}
-                onChange={(e) => setFormData({ ...formData, assignedReviewer: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none text-slate-900 dark:text-white"
-                required
-              >
-                <option value="">Select a reviewer...</option>
-                {reviewers.map((reviewer) => (
-                  <option key={reviewer.id} value={reviewer.id}>
-  {reviewer.full_name} - {reviewer.email}
-</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
 
-        {/* Upload Documents */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-         <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Supporting Documents</h3>
-          
+      {/* Supporting Documents */} 
+      <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+     <Upload className="w-5 h-5 text-blue-600" />
+      Supporting Documents 
+    </h3> 
+
           {/* Upload Area */}
-          <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all">
+          <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl py-4 px-4 text-center hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all">
             <input
               type="file"
               id="fileUpload"
@@ -475,8 +485,8 @@ await supabase.from('notifications').insert([
             />
             <label htmlFor="fileUpload" className="cursor-pointer">
               <div className="flex flex-col items-center gap-3">
-                <div className="p-4 bg-blue-100 rounded-full">
-                  <Upload className="w-8 h-8 text-blue-600" />
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <Upload className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
                   <p className="font-medium text-slate-900 dark:text-white mb-1">
@@ -549,7 +559,8 @@ await supabase.from('notifications').insert([
               Submit for Review
             </button>
           </div>
-        </div>
+          </div>
+          </div>
       </form>
     </div>
   );

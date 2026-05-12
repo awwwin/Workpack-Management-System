@@ -81,8 +81,25 @@ useEffect(() => {
     }
   };
 
+  const getStatusBannerClass = (status: string) => {
+  switch (status) {
+    case 'draft':
+      return 'bg-gradient-to-r from-slate-500 to-slate-600';
+    case 'pending_review':
+      return 'bg-gradient-to-r from-amber-500 to-amber-600';
+    case 'approved':
+      return 'bg-gradient-to-r from-emerald-500 to-emerald-600';
+    case 'rejected':
+      return 'bg-gradient-to-r from-red-500 to-red-600';
+    case 'revision_requested':
+      return 'bg-gradient-to-r from-orange-500 to-orange-600';
+    default:
+      return 'bg-gradient-to-r from-slate-500 to-slate-600';
+  }
+};
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full max-w-none space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
@@ -98,7 +115,7 @@ useEffect(() => {
       </div>
 
       {/* Status Banner */}
-      <div className={`bg-gradient-to-r from-${statusInfo.color}-500 to-${statusInfo.color}-600 rounded-xl p-6 text-white`}>
+     <div className={`${getStatusBannerClass(workpack.status)} rounded-xl p-6 text-white`}>
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
