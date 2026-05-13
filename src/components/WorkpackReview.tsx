@@ -34,6 +34,7 @@ const [timeline, setTimeline] = useState<any[]>([]);
       .from('workpacks')
       .select('*')
       .eq('id', Number(id))
+      .eq('is_deleted', false)
       .maybeSingle();
 
     if (error) {

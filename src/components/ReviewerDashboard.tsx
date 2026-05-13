@@ -43,7 +43,8 @@ useEffect(() => {
       .from('workpacks')
       .select('*')
       .eq('reviewer_id', profileData.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .eq('is_deleted', false);
 
     if (workpackError) {
       console.error('Workpack fetch error:', workpackError.message);

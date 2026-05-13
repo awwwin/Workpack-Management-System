@@ -40,7 +40,8 @@ const loadFormOptions = async () => {
   const { data: workpackData, error: workpackError } = await supabase
     .from('workpacks')
     .select('id, title')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .eq('is_deleted', false);
 
   if (workpackError) {
     showToast(workpackError.message, 'error');

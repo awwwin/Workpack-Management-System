@@ -26,7 +26,8 @@ useEffect(() => {
       .from('workpacks')
       .select('*')
       .eq('id', Number(id))
-      .maybeSingle();
+      .maybeSingle()
+      .eq('is_deleted', false);
 
     if (error) {
       console.error('Workpack fetch error:', error.message);

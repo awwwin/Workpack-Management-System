@@ -157,7 +157,7 @@ export function LoginLoading({ onComplete }: LoginLoadingProps) {
       </div>
 
       {/* Loading Text */}
-      <div className="text-center mb-20">
+      <div className="text-center mb-8">
         <motion.h2
           key={currentStep}
           initial={{ opacity: 0, y: 10 }}
@@ -172,7 +172,7 @@ export function LoginLoading({ onComplete }: LoginLoadingProps) {
       </div>
 
       {/* Progress Bar at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 px-8 pb-8">
+      <div className="w-full px-8">
         <div className="max-w-md mx-auto">
           {/* Progress Text */}
           <div className="flex items-center justify-between mb-3">

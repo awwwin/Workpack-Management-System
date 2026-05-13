@@ -39,7 +39,8 @@ useEffect(() => {
     const { data: workpacksData, error: workpacksError } = await supabase
       .from('workpacks')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .eq('is_deleted', false);
 
     if (workpacksError) {
       console.error('Workpacks fetch error:', workpacksError.message);

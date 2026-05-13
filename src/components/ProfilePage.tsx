@@ -63,7 +63,8 @@ useEffect(() => {
     const { data: workpackData, error: workpackError } = await supabase
   .from('workpacks')
   .select('*')
-  .eq('created_by', authData.user.id);
+  .eq('created_by', authData.user.id)
+  .eq('is_deleted', false);
 
 if (workpackError) {
   console.error('Workpack stats error:', workpackError.message);

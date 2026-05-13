@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Eye, Edit, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, Eye, Edit, ArrowUpDown, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
 
 export function WorkpackList() {
   const navigate = useNavigate();
@@ -45,7 +46,10 @@ const filteredByRole =
     const { data: workpackData, error: workpackError } = await supabase
       .from('workpacks')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .eq('is_deleted', false);
+
+    
 
     if (workpackError) {
       console.error('Workpack fetch error:', workpackError.message);
@@ -99,6 +103,31 @@ const getPageTitle = () => {
   return 'My Workpacks';
 };
 
+const handleDelete = async (id: number) => {
+
+  const { data: authData } = await supabase.auth.getUser();
+
+  const { error } = await supabase
+    .from('workpacks')
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString(),
+      deleted_by: authData.user?.id,
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setWorkpacks((prev) =>
+    prev.filter((w) => w.id !== id)
+  );
+
+  alert('Workpack moved to trash');
+};
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -143,6 +172,17 @@ const getPageTitle = () => {
               <option value="revision_requested">Revision Requested</option>
             </select>
           </div>
+             
+            {currentUser?.role === 'contractor' && (
+           <button
+                onClick={() => navigate('/dashboard/trash')}
+                 className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all"
+                  >
+                  <Trash2 className="w-4 h-4" />
+                <span>Trash</span>
+           </button>
+              )}
+
         </div>
       </div>
 
@@ -233,16 +273,26 @@ const getPageTitle = () => {
             >
               <Eye className="w-4 h-4 text-slate-600 dark:text-slate-300" />
             </button>
-            {currentUser?.role === 'contractor' && workpack.status === 'draft' && (
-              <button
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all"
-                title="Edit"
-              >
-                <Edit className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-              </button>
+{currentUser?.role === 'contractor' && workpack.status === 'draft' && (
+  <>
+    <button
+      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all"
+      title="Edit"
+    >
+      <Edit className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+    </button>
+
+    <button
+      onClick={() => handleDelete(workpack.id)}
+      className="p-2 hover:bg-red-50 rounded-lg transition-all"
+      title="Move to Trash"
+    >
+      <Trash2 className="w-4 h-4 text-red-500" />
+    </button>
+  </>
+)}
+</>
             )}
-          </>
-        )}
       </div>
     </td>
   </tr>
